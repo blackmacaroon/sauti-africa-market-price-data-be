@@ -205,7 +205,7 @@ async function getSautiData(query,apiCount) {
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
     : (prev = null)
 
-  /*  
+/*  
   existing available data: 
 
   loop entries to determine count+1 
@@ -213,15 +213,28 @@ async function getSautiData(query,apiCount) {
   firstEntry --> first entry on first page
   lastEntry --> first entry on second page
 
-  let remainingCount = totalCount - count --> remaining records starting from count+1 records
+  **** Find count of remaining records ****
+  let remainingCount = totalCount - count
+
+  **** calculate number of pages based on count value ****
   let pageCount = remainingCount/count
 
+  **** run query again using the lastEntry and offset ****
 
-  for (let i=0;i<pageCount; i++){
-    
+  remainingEntries = await queryOperation
+      .where('active', (query.a = 1))
+      .orderBy('date', 'desc')
+      .orderBy('id', 'desc')
+      .offset(Number(count) + 1)
   }
 
-  */
+
+  **** loop through the entries ****
+  for (let i=0;i<pageCount; i++){
+
+  }
+
+*/
 
   return {
     records: entriesOffset,
