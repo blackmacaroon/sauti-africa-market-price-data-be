@@ -8,6 +8,7 @@ module.exports = {
   getListsOfThings
 }
 
+
 // Helper function with filter searches for developer
 // Notes:
 // Flexible by allowing user to select whichever query they want
@@ -177,8 +178,10 @@ async function getSautiData(query,apiCount) {
     
 
 
-
+    //total records returned
     totalCount = await queryOperation.clone().count()
+
+    //first set of records based on count, +1 record for next reference.
     entries = await queryOperation
       .where('active', (query.a = 1))
       .orderBy('date', 'desc')
@@ -186,15 +189,39 @@ async function getSautiData(query,apiCount) {
       .limit(Number(count) + 1)
   }
 
+  let pagesArray;
+
+  //count+1 record
   const lastEntry = entries[entries.length - 1]
 
+  //set reference to first records of page 2
   entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
   const entriesOffset = entries.splice(0, Number(count))
 
+
+  //first page
   const firstEntry = entriesOffset[0]
   entriesOffset.length
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
     : (prev = null)
+
+  /*  
+  existing available data: 
+
+  loop entries to determine count+1 
+  totalcount --> total count of returned records
+  firstEntry --> first entry on first page
+  lastEntry --> first entry on second page
+
+  let remainingCount = totalCount - count --> remaining records starting from count+1 records
+  let pageCount = remainingCount/count
+
+
+  for (let i=0;i<pageCount; i++){
+    
+  }
+
+  */
 
   return {
     records: entriesOffset,
