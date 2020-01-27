@@ -47,7 +47,13 @@ module.exports = {
     client: 'mysql', // install this package
     connection: process.env.ST_DATABASE_URL,
     pool: {
-      afterCreate()
+      afterCreate: function(conn, done){
+        conn.query('SET row_number=0', function(err){
+          if (err){
+            done(err,conn);
+          }
+        })
+      }
     }
   }
 }

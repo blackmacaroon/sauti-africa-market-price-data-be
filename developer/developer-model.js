@@ -124,8 +124,9 @@ async function getSautiData(query,apiCount) {
   else {
     // If user wants data from specific country/countries
     let queryOperation = DBSt('platform_market_prices2')
+    console.log(`query: `,query)
 
-    console.log((await queryOperation).length)
+    // console.log((await queryOperation).length)
 
     if (query.c && !Array.isArray(query.c)) {
       queryOperation = queryOperation.whereIn('country', [query.c])
@@ -178,7 +179,8 @@ async function getSautiData(query,apiCount) {
       'currency',
       'unit',
       'date',
-      'udate'
+      'udate',
+      // 'row_number'
     )
 
     if (startDate && endDate) {
@@ -217,24 +219,24 @@ async function getSautiData(query,apiCount) {
 
     //get pages --> return nth record after setting the starting record. Then, loop over the return and 
     //move to global
-    let pageArray;
-    let queryPages;
+    // let pageArray;
+    // let queryPages;
 
-    if (await next !== null){
-      queryPages = await queryOperation
-      //this should start us on the 31st record in the response. 
-        .where(function() {
-          this.whereRaw('date > ?', [lastEntry.date]).orWhere(function() {
-            this.whereRaw('date = ?', [lastEntry.date]).andWhereRaw('id >= ?', [lastEntry.id])
-          })
-          // .andWhereRaw("id <= ?", [nextId]);
-        })
-        //return every nth (count) record
-        .where('active', (query.a = 1))
-        .orderBy('date', 'desc')
-        .orderBy('id', 'desc')
-        // .limit(Number(count) + 1)
-      }
+    // if (await next !== null){
+    //   queryPages = await queryOperation
+    //   //this should start us on the 31st record in the response. 
+    //     .where(function() {
+    //       this.whereRaw('date > ?', [lastEntry.date]).orWhere(function() {
+    //         this.whereRaw('date = ?', [lastEntry.date]).andWhereRaw('id >= ?', [lastEntry.id])
+    //       })
+    //       // .andWhereRaw("id <= ?", [nextId]);
+    //     })
+    //     //return every nth (count) record
+    //     .where('active', (query.a = 1))
+    //     .orderBy('date', 'desc')
+    //     .orderBy('id', 'desc')
+    //     // .limit(Number(count) + 1)
+    //   }
     }
 
   return {
