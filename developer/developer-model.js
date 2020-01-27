@@ -29,6 +29,7 @@ async function getSautiData(query,apiCount) {
     const nextDate = new Date(cursorArray[0])
     const nextId = cursorArray[1]
     let queryOperation = DBSt('platform_market_prices2')
+    // console.log(await typeof queryOperation)
 
     // If user wants data from specific country/countries
     if (query.c && !Array.isArray(query.c)) {
@@ -83,7 +84,7 @@ async function getSautiData(query,apiCount) {
       'date',
       'udate'
     )
-
+    // console.log(await queryOperation)
     if (startDate && endDate) {
       queryOperation = queryOperation.andWhereBetween('date', [
         startDate,
@@ -106,6 +107,9 @@ async function getSautiData(query,apiCount) {
   } else {
     // If user wants data from specific country/countries
     let queryOperation = DBSt('platform_market_prices2')
+
+    console.log((await queryOperation).length)
+
     if (query.c && !Array.isArray(query.c)) {
       queryOperation = queryOperation.whereIn('country', [query.c])
     } else if (query.c && Array.isArray(query.c)) {
@@ -127,7 +131,7 @@ async function getSautiData(query,apiCount) {
       queryOperation = queryOperation.whereIn('product_cat', query.pcat)
     }
 
-    //if user wnats data from product subcategory
+    //if user wants data from product subcategory
     if (query.pagg && !Array.isArray(query.pagg)) {
       //pagg = product_agg -> product type
       queryOperation = queryOperation.whereIn('product_agg', [query.pagg])
@@ -165,6 +169,15 @@ async function getSautiData(query,apiCount) {
         endDate
       ])
     }
+
+    // console.log(await queryOperation.map(item => {
+    //   return item
+    // }))
+
+    
+
+
+
     totalCount = await queryOperation.clone().count()
     entries = await queryOperation
       .where('active', (query.a = 1))
