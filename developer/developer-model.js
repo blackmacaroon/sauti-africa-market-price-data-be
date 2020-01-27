@@ -105,7 +105,23 @@ async function getSautiData(query,apiCount) {
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
-  } else {
+
+
+    //count+1 record
+    const lastEntry = entries[entries.length - 1]
+
+    //set reference to first records of page 2
+    entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
+    const entriesOffset = entries.splice(0, Number(count))
+
+
+    //first page
+    const firstEntry = entriesOffset[0]
+    entriesOffset.length
+      ? (prev = `${firstEntry.date}_${firstEntry.id}`)
+      : (prev = null)
+  } 
+  else {
     // If user wants data from specific country/countries
     let queryOperation = DBSt('platform_market_prices2')
 
@@ -148,6 +164,7 @@ async function getSautiData(query,apiCount) {
       queryOperation = queryOperation.whereIn('product', query.p)
     }
 
+
     queryOperation = queryOperation.select(
       'id',
       'country',
@@ -171,15 +188,10 @@ async function getSautiData(query,apiCount) {
       ])
     }
 
-    // console.log(await queryOperation.map(item => {
-    //   return item
-    // }))
-
-    
-
 
     //total records returned
     totalCount = await queryOperation.clone().count()
+
 
     //first set of records based on count, +1 record for next reference.
     entries = await queryOperation
@@ -187,54 +199,43 @@ async function getSautiData(query,apiCount) {
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
-  }
 
-  let pagesArray;
+      //count+1 record
+    const lastEntry = entries[entries.length - 1]
 
-  //count+1 record
-  const lastEntry = entries[entries.length - 1]
-
-  //set reference to first records of page 2
-  entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
-  const entriesOffset = entries.splice(0, Number(count))
+    //set reference to first records of page 2
+    entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
+    const entriesOffset = entries.splice(0, Number(count))
 
 
-  //first page
-  const firstEntry = entriesOffset[0]
-  entriesOffset.length
-    ? (prev = `${firstEntry.date}_${firstEntry.id}`)
-    : (prev = null)
-
-/*  
-  existing available data: 
-
-  loop entries to determine count+1 
-  totalcount --> total count of returned records
-  firstEntry --> first entry on first page
-  lastEntry --> first entry on second page
-
-  **** Find count of remaining records ****
-  let remainingCount = totalCount - count
-
-  **** calculate number of pages based on count value ****
-  let pageCount = remainingCount/count
-
-  **** run query again using the lastEntry and offset ****
-
-  remainingEntries = await queryOperation
-      .where('active', (query.a = 1))
-      .orderBy('date', 'desc')
-      .orderBy('id', 'desc')
-      .offset(Number(count) + 1)
-  }
+    //first page
+    const firstEntry = entriesOffset[0]
+    entriesOffset.length
+      ? (prev = `${firstEntry.date}_${firstEntry.id}`)
+      : (prev = null)
 
 
-  **** loop through the entries ****
-  for (let i=0;i<pageCount; i++){
+    //get pages --> return nth record after setting the starting record. Then, loop over the return and 
+    //move to global
+    let pageArray;
+    let queryPages;
 
-  }
-
-*/
+    if (await next !== null){
+      queryPages = await queryOperation
+      //this should start us on the 31st record in the response. 
+        .where(function() {
+          this.whereRaw('date > ?', [lastEntry.date]).orWhere(function() {
+            this.whereRaw('date = ?', [lastEntry.date]).andWhereRaw('id >= ?', [lastEntry.id])
+          })
+          // .andWhereRaw("id <= ?", [nextId]);
+        })
+        //return every nth (count) record
+        .where('active', (query.a = 1))
+        .orderBy('date', 'desc')
+        .orderBy('id', 'desc')
+        // .limit(Number(count) + 1)
+      }
+    }
 
   return {
     records: entriesOffset,

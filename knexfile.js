@@ -45,6 +45,9 @@ module.exports = {
   /*=== Sauti Africa Market Database ===*/
   sauti: {
     client: 'mysql', // install this package
-    connection: process.env.ST_DATABASE_URL
+    connection: process.env.ST_DATABASE_URL,
+    pool: {
+      afterCreate()
+    }
   }
 }
