@@ -1,4 +1,5 @@
 const DBSt = require('../database/dbSTConfig')
+const bookshelf = require('bookshelf')(DBSt)
 
 module.exports = {
   getSautiData,
@@ -18,10 +19,14 @@ module.exports = {
 async function getSautiData(query, apiCount) {
   let { startDate, endDate, count } = query
 
-  console.log('DATES', startDate, endDate)
-
   let entries
   let totalCount
+  const shelfData = bookshelf.model('shelfData', {
+    tableName: 'platform_market_prices2'
+  })
+
+  // * WORKING EXAMPLE OF FETCHING ALL DATA FROM TABLE AND CONVERTING DATA.
+  console.log('BOOKSHELF DATA PULL', await new shelfData().fetchAll().then(res => res.toJSON()))
 
   //cursor pagination in developer routes is identical to what's implemented in
   //client-model except that developer model allows for dynamic limit of results per page.
