@@ -180,7 +180,6 @@ async function getSautiData(query,apiCount) {
       'unit',
       'date',
       'udate',
-      // 'row_number'
     )
 
     if (startDate && endDate) {
@@ -202,19 +201,11 @@ async function getSautiData(query,apiCount) {
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
 
-      //count+1 record
-    const lastEntry = entries[entries.length - 1]
 
-    //set reference to first records of page 2
-    entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
-    const entriesOffset = entries.splice(0, Number(count))
+    // entries = await DBSt
+    //   .raw(`SELECT *, (@row_number:=@row_number + 1) AS 'num' FROM platform_market_prices2 ORDER BY 'date' DESC LIMIT ${Number(count)+1}`)
 
 
-    //first page
-    const firstEntry = entriesOffset[0]
-    entriesOffset.length
-      ? (prev = `${firstEntry.date}_${firstEntry.id}`)
-      : (prev = null)
 
 
     //get pages --> return nth record after setting the starting record. Then, loop over the return and 
@@ -238,6 +229,21 @@ async function getSautiData(query,apiCount) {
     //     // .limit(Number(count) + 1)
     //   }
     }
+
+    
+    //count+1 record
+    const lastEntry = entries[entries.length - 1]
+
+    //set reference to first records of page 2
+    entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
+    const entriesOffset = entries.splice(0, Number(count))
+
+
+    //first page
+    const firstEntry =  entriesOffset[0]
+    entriesOffset.length
+      ? (prev = `${firstEntry.date}_${firstEntry.id}`)
+      : (prev = null)
 
   return {
     records: entriesOffset,

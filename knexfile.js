@@ -48,10 +48,8 @@ module.exports = {
     connection: process.env.ST_DATABASE_URL,
     pool: {
       afterCreate: function(conn, done){
-        conn.query('SET row_number=0', function(err){
-          if (err){
-            done(err,conn);
-          }
+        conn.query('SET @row_number=0', function(err){
+          done(err,conn)
         })
       }
     }
