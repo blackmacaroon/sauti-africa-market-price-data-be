@@ -15,7 +15,7 @@ module.exports = {
 // Used whereIn in the if/else if statements so that the query can be turned into an array
 // if/else if statements used for countries, markets, etc. for single selection and multiple selection
 
-async function getSautiData(query,apiCount) {
+async function getSautiData(query, apiCount) {
   let { startDate, endDate, count } = query
 
   console.log('DATES', startDate, endDate)
@@ -98,8 +98,8 @@ async function getSautiData(query,apiCount) {
     console.log('DATES', startDate, endDate)
 
     entries = await queryOperation
-      .where(function() {
-        this.whereRaw('date < ?', [nextDate]).orWhere(function() {
+      .where(function () {
+        this.whereRaw('date < ?', [nextDate]).orWhere(function () {
           this.whereRaw('date = ?', [nextDate]).andWhereRaw('id <= ?', [nextId])
         })
         // .andWhereRaw("id <= ?", [nextId]);
@@ -181,7 +181,7 @@ async function getSautiData(query,apiCount) {
     //   return item
     // }))
 
-    
+
 
 
     //total records returned
@@ -194,21 +194,37 @@ async function getSautiData(query,apiCount) {
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
 
-      // TODO: COMPLETE MANUAL FUNCTION FOR ORGANIZING A COMPLETE SET OF TRAVERSING DATA OBEJCT.
-      let organizedData = {}
-      const organizeData = (data, count) => {
-        organizedData = { one: [...data] }
-        if (organizeData.length > 0) {
-          for(let page in organizedData) {
-            let organziedDataCount = 0 + organizedData[page].length
-            console.log('FULL DATA COUNT',count['count(*)'])
-            console.log('CURRENT STORED COUNT', organziedDataCount)
-            console.log('TEH DATA', organizedData[page].length)
-            console.log('ENTRIES', data)
-          }
-        }
-      }
-      organizeData(entries, totalCount[0])
+    // TODO: COMPLETE MANUAL FUNCTION FOR ORGANIZING A COMPLETE SET OF TRAVERSING DATA OBEJCT.
+    // TODO: POSSIBLE CODE CLEANUP, IF BOOKSHEL ORM DOES NOT COMPELTE FUNCTIONALITY FEATURE.
+    // let organizedData = {}
+    // const organizeData = (data, count) => {
+    //   organizedData = { one: [...data] }
+    //   const newQuery = async () => {
+    //     console.log(await DBSt.table('platform_market_prices2').)
+    //     // * QUERY MORE RESULTS
+    //     const results = await queryOperation
+    //       .where(
+    //         'date',
+    //         '>',
+    //         JSON.stringify(organizedData.one[organizedData.one.length - 1].date)
+    //       ).limit(30)
+
+    //     if (organizeData.length > 0) {
+    //       for (let page in organizedData) {
+    //         let organziedDataCount = 0 + organizedData[page].length
+    //         console.log('FULL DATA COUNT', count['count(*)'])
+    //         console.log('CURRENT STORED COUNT', organziedDataCount)
+    //         console.log('TEH DATA', organizedData[page].length)
+    //         console.log('ENTRIES', data)
+    //         console.log('LAST', organizedData.one[organizedData.one.length - 1].date)
+    //       }
+    //     }
+
+    //     return results
+    //   }
+    //   console.log('NEW QUERY', newQuery())
+    // }
+    // organizeData(entries, totalCount[0])
 
   }
 
@@ -226,7 +242,7 @@ async function getSautiData(query,apiCount) {
   const firstEntry = entriesOffset[0]
   entriesOffset.length
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
-    : (prev = null)
+      : (prev = null)
 
 /*  
   existing available data: 
@@ -260,12 +276,12 @@ async function getSautiData(query,apiCount) {
 */
 
   return {
-    records: entriesOffset,
-    recentRecordDate:firstEntry.date,
-    next: next,
-    prev: prev,
-    count: totalCount
-  }
+      records: entriesOffset,
+        recentRecordDate: firstEntry.date,
+          next: next,
+            prev: prev,
+              count: totalCount
+    }
 }
 
 
@@ -288,10 +304,10 @@ async function latestPriceAcrossAllMarkets(query) {
      order by pmp.date desc`,
     [product, product]
   )
- 
+
   return {
-    records:records[0],
-    recentRecordDate:records[0][0].date,
+    records: records[0],
+    recentRecordDate: records[0][0].date,
   }
 }
 
@@ -316,15 +332,15 @@ async function latestPriceByMarket(query) {
     .andWhere('market', `${market}`)
     .orderBy('date', 'desc')
     .limit(1)
-  
+
   const result = [queryResult[0]]
 
 
   return {
-    records:result,
-    recentRecordDate:result[0].date
+    records: result,
+    recentRecordDate: result[0].date
   }
-  
+
 }
 
 
@@ -367,8 +383,8 @@ async function getProductPriceRange(query) {
       .andWhereBetween('date', [startDate, endDate])
 
     entries = await queryOperation
-      .where(function() {
-        this.whereRaw('date < ?', [nextDate]).orWhere(function() {
+      .where(function () {
+        this.whereRaw('date < ?', [nextDate]).orWhere(function () {
           this.whereRaw('date = ?', [nextDate]).andWhereRaw('id <= ?', [nextId])
         })
       })
@@ -398,13 +414,13 @@ async function getProductPriceRange(query) {
   const firstEntry = entriesOffset[0]
   entriesOffset.length
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
-    : (prev = null)
+      : (prev = null)
 
   return {
-    records: entriesOffset,
-    next: next,
-    prev: prev,
-    count: totalCount
-  }
+      records: entriesOffset,
+        next: next,
+          prev: prev,
+            count: totalCount
+    }
 }
 
