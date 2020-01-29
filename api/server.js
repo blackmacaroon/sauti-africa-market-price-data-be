@@ -14,6 +14,7 @@ const userRoleRouter = require('../routes/users/userRoles')
 const rateLimit = require("express-rate-limit") //throttling package
 const timePeriod = require('../middleware/time-period-middleware')
 
+
 //Initialize the rate limit 
 const apiThrottler = rateLimit({
   windowsMs: 0.1 * 60 * 1000,

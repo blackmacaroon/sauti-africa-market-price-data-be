@@ -1,5 +1,6 @@
 const DBSt = require('../database/dbSTConfig')
-
+const { attachPaginate } = require('knex-paginate');
+attachPaginate();
 module.exports = {
   getSautiData,
   latestPriceByMarket,
@@ -7,43 +8,47 @@ module.exports = {
   getProductPriceRange,
   getListsOfThings
 }
-
 // Helper function with filter searches for developer
 // Notes:
 // Flexible by allowing user to select whichever query they want
 // Used whereIn in the if/else if statements so that the query can be turned into an array
 // if/else if statements used for countries, markets, etc. for single selection and multiple selection
-
 async function getSautiData(query,apiCount) {
   let { startDate, endDate, count } = query
-
   let entries
   let totalCount
-
   //cursor pagination in developer routes is identical to what's implemented in
   //client-model except that developer model allows for dynamic limit of results per page.
   //More extensive code comments are in client-model.js file.
 
+  //!--> currentPage gets returned in the initial response as res.pagination.currentPage.  
+  //! must be returned in the req as req.currentPage
+
+  /*
+  const paginate = async (perPage, currentPage) => console.log(await queryOperation.where('country','=','BDI').andWhere('active','=','1').paginate({ perPage, currentPage }))
+      paginate(30, 1)
+      paginate(30, 2)
+  */
+
+
+  //! if (req.currentPage)
   if (query.next) {
     const cursorArray = query.next.split('_')
     const nextDate = new Date(cursorArray[0])
     const nextId = cursorArray[1]
     let queryOperation = DBSt('platform_market_prices2')
-
     // If user wants data from specific country/countries
     if (query.c && !Array.isArray(query.c)) {
       queryOperation = queryOperation.whereIn('country', [query.c])
     } else if (query.c && Array.isArray(query.c)) {
       queryOperation = queryOperation.whereIn('country', query.c)
     }
-
     // If user wants data from specific markets
     if (query.m && !Array.isArray(query.m)) {
       queryOperation = queryOperation.whereIn('market', [query.m])
     } else if (query.m && Array.isArray(query.m)) {
       queryOperation = queryOperation.whereIn('market', query.m)
     }
-
     //if user wants data from spcific product categories
     if (query.pcat && !Array.isArray(query.pcat)) {
       //pcat = product category (product_cat) -> General
@@ -51,7 +56,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.pcat && Array.isArray(query.pcat)) {
       queryOperation = queryOperation.whereIn('product_cat', query.pcat)
     }
-
     //if user wnats data from product subcategory
     if (query.pagg && !Array.isArray(query.pagg)) {
       //pagg = product_agg -> product type
@@ -59,7 +63,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.pagg && Array.isArray(query.pagg)) {
       queryOperation = queryOperation.whereIn('product_agg', query.pagg)
     }
-
     //if user wants data of specific products
     if (query.p && !Array.isArray(query.p)) {
       //p = product -> Specific product
@@ -67,7 +70,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.p && Array.isArray(query.p)) {
       queryOperation = queryOperation.whereIn('product', query.p)
     }
-
     queryOperation = queryOperation.select(
       'id',
       'country',
@@ -83,14 +85,12 @@ async function getSautiData(query,apiCount) {
       'date',
       'udate'
     )
-
     if (startDate && endDate) {
       queryOperation = queryOperation.andWhereBetween('date', [
         startDate,
         endDate
       ])
     }
-
     entries = await queryOperation
       .where(function() {
         this.whereRaw('date < ?', [nextDate]).orWhere(function() {
@@ -98,7 +98,6 @@ async function getSautiData(query,apiCount) {
         })
         // .andWhereRaw("id <= ?", [nextId]);
       })
-
       .where('active', (query.a = 1))
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
@@ -111,14 +110,12 @@ async function getSautiData(query,apiCount) {
     } else if (query.c && Array.isArray(query.c)) {
       queryOperation = queryOperation.whereIn('country', query.c)
     }
-
     // If user wants data from specific markets
     if (query.m && !Array.isArray(query.m)) {
       queryOperation = queryOperation.whereIn('market', [query.m])
     } else if (query.m && Array.isArray(query.m)) {
       queryOperation = queryOperation.whereIn('market', query.m)
     }
-
     //if user wants data from spcific product categories
     if (query.pcat && !Array.isArray(query.pcat)) {
       //pcat = product category (product_cat) -> General
@@ -126,7 +123,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.pcat && Array.isArray(query.pcat)) {
       queryOperation = queryOperation.whereIn('product_cat', query.pcat)
     }
-
     //if user wnats data from product subcategory
     if (query.pagg && !Array.isArray(query.pagg)) {
       //pagg = product_agg -> product type
@@ -134,7 +130,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.pagg && Array.isArray(query.pagg)) {
       queryOperation = queryOperation.whereIn('product_agg', query.pagg)
     }
-
     //if user wants data of specific products
     if (query.p && !Array.isArray(query.p)) {
       //p = product -> Specific product
@@ -142,7 +137,6 @@ async function getSautiData(query,apiCount) {
     } else if (query.p && Array.isArray(query.p)) {
       queryOperation = queryOperation.whereIn('product', query.p)
     }
-
     queryOperation = queryOperation.select(
       'id',
       'country',
@@ -158,7 +152,6 @@ async function getSautiData(query,apiCount) {
       'date',
       'udate'
     )
-
     if (startDate && endDate) {
       queryOperation = queryOperation.andWhereBetween('date', [
         startDate,
@@ -171,18 +164,27 @@ async function getSautiData(query,apiCount) {
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
+
+      const paginate = async (perPage, currentPage) => console.log(await queryOperation.where('country','=','BDI').andWhere('active','=','1').paginate({ perPage, currentPage }))
+      paginate(30, 1)
+      paginate(30, 2)
+      // paginate(1, 2)
+      // paginate(1, 3)
+      // paginate(1, 4)
+      // paginate(1, 5)
+      // paginate(1, 6)
+      // paginate(1, 7)
+      // paginate(1, 8)
+      // paginate(1, 9)
+      // paginate(1, 10)
   }
-
   const lastEntry = entries[entries.length - 1]
-
   entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
   const entriesOffset = entries.splice(0, Number(count))
-
   const firstEntry = entriesOffset[0]
   entriesOffset.length
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
     : (prev = null)
-
   return {
     records: entriesOffset,
     recentRecordDate:firstEntry.date,
@@ -191,35 +193,28 @@ async function getSautiData(query,apiCount) {
     count: totalCount
   }
 }
-
-
 // fn to get the latest price for a product across all markets //
-
 async function latestPriceAcrossAllMarkets(query) {
   const { product } = query
-
   const records = await DBSt.schema.raw(
     `SELECT pmp.source, pmp.market, pmp.product, pmp.retail, pmp.wholesale, pmp.currency, pmp.date, pmp.udate FROM platform_market_prices2 AS pmp INNER JOIN
     (
-        SELECT max(date) as maxDate, market, product, retail, currency, wholesale, source, udate 
+        SELECT max(date) as maxDate, market, product, retail, currency, wholesale, source, udate
        FROM platform_market_prices2
        WHERE product=?
        GROUP BY market
-   ) p2 
+   ) p2
    ON pmp.market = p2.market
     AND pmp.date = p2.maxDate
      WHERE pmp.product=?
      order by pmp.date desc`,
     [product, product]
   )
- 
   return {
     records:records[0],
     recentRecordDate:records[0][0].date,
   }
 }
-
-
 // fn to get the latest price for a product by market //
 async function latestPriceByMarket(query) {
   const { product, market } = query
@@ -240,20 +235,12 @@ async function latestPriceByMarket(query) {
     .andWhere('market', `${market}`)
     .orderBy('date', 'desc')
     .limit(1)
-  
   const result = [queryResult[0]]
-
-
   return {
     records:result,
     recentRecordDate:result[0].date
   }
-  
 }
-
-
-
-
 // fn that returns a list of items, markets by default //
 function getListsOfThings(query, selector) {
   let queryOperation = DBSt('platform_market_prices2')
@@ -274,13 +261,10 @@ function getListsOfThings(query, selector) {
   }
 }
 // fn that returns records for a product via date range, with pagination //
-
 async function getProductPriceRange(query) {
   let { product, startDate, endDate, count } = query
-
   let entries
   let totalCount
-
   if (query.next) {
     const cursorArray = query.next.split('_')
     const nextDate = new Date(cursorArray[0])
@@ -289,7 +273,6 @@ async function getProductPriceRange(query) {
       .select('*')
       .where('product', product)
       .andWhereBetween('date', [startDate, endDate])
-
     entries = await queryOperation
       .where(function() {
         this.whereRaw('date < ?', [nextDate]).orWhere(function() {
@@ -305,7 +288,6 @@ async function getProductPriceRange(query) {
       .select('*')
       .where('product', product)
       .andWhereBetween('date', [startDate, endDate])
-
     totalCount = await queryOperation.clone().count()
     entries = await queryOperation
       .where('active', (query.a = 1))
@@ -313,17 +295,13 @@ async function getProductPriceRange(query) {
       .orderBy('id', 'desc')
       .limit(Number(count) + 1)
   }
-
   const lastEntry = entries[entries.length - 1]
-
   entries.length ? (next = `${lastEntry.date}_${lastEntry.id}`) : (next = null)
   const entriesOffset = entries.splice(0, Number(count))
-
   const firstEntry = entriesOffset[0]
   entriesOffset.length
     ? (prev = `${firstEntry.date}_${firstEntry.id}`)
     : (prev = null)
-
   return {
     records: entriesOffset,
     next: next,
@@ -331,4 +309,3 @@ async function getProductPriceRange(query) {
     count: totalCount
   }
 }
-
