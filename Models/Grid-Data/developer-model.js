@@ -1,129 +1,20 @@
 // * PKGS && DB
-const DBSt = require('../database/dbSTConfig')
+const DBSt = require('../../database/dbSTConfig')
 const { attachPaginate } = require('knex-paginate');
 
 // * INITIALIZE KNEX-PAGINATE
 attachPaginate();
 
-module.exports = {
-  getSautiData,
-  latestPriceByMarket,
-  latestPriceAcrossAllMarkets,
-  getProductPriceRange,
-  getListsOfThings
-}
-// Helper function with filter searches for developer
-// Notes:
-// Flexible by allowing user to select whichever query they want
-// Used whereIn in the if/else if statements so that the query can be turned into an array
-// if/else if statements used for countries, markets, etc. for single selection and multiple selection
-async function getSautiData(query) {
-
-  // * VARIABLES FROM ARGUMENT (query)
-  const {
-    startDate,
-    endDate,
-    count,
-    next
-  } = query
-
-  // * INITIAL DB FROM (platform_market_prices2)
-  let queryOperation = DBSt('platform_market_prices2')
-
-  // * PAGINATION OPERATION
-  const paginate = async (perPage, currentPage) => await queryOperation
-    .where('active', (query.a = 1))
-    .orderBy('date', 'desc')
-    .orderBy('id', 'desc')
-    .paginate({
-      perPage,
-      currentPage
-    })
-
-  // * IF QUERY === TRUE, CHECK FOR FILTER OPTIONS, AND UPDATE DATA RESULTS.
-  const filterQueryOperation = (query) => {
-    // ? QUERY OPERATION EXPRESSION FOR QUERY VALUE IF TRUTHY.
-    const assignment = (key, query) => {
-      if (query && !Array.isArray(query)) {
-        queryOperation = queryOperation.whereIn(key, [query])
-      } else if (query && Array.isArray(query)) {
-        queryOperation = queryOperation.whereIn(key, query)
-      }
-    }
-
-    // ? FILTER QUERY OPERATION BASED ON FILTER OPTIONS
-    if (query.c) assignment('country', query.c)
-    if (query.m) assignment('market', query.m)
-    if (query.pcat) assignment('product_cat', query.pcat)
-    if (query.pagg) assignment('product_agg', query.pagg)
-    if (query.p) assignment('product', query.p)
-  };
-
-  // ? IF QUERY IS TRUTHY, CHECK FOR FILTER OPTIONS
-  if (query) filterQueryOperation(query);
-
-  queryOperation = queryOperation.select(
-    'id',
-    'country',
-    'market',
-    'source',
-    'product_cat',
-    'product_agg',
-    'product',
-    'retail',
-    'wholesale',
-    'currency',
-    'unit',
-    'date',
-    'udate'
-  )
-
-  if (startDate && endDate) {
-    queryOperation = queryOperation.andWhereBetween('date', [
-      startDate,
-      endDate
-    ])
-  }
-
-  const recentRecordDate = await queryOperation
-    .where('active', (query.a = 1))
-    .orderBy('date', 'desc')
-    .orderBy('id', 'desc')
-    .then(result => {
-      return result[0].date
-    })
-
-
-  if (count && next) {
-    return {
-      data: await paginate(count, next),
-      recentRecordDate: recentRecordDate
-    }
-  } else if (count) {
-    return {
-      data: await paginate(count, 1),
-      recentRecordDate: recentRecordDate
-    }
-  } else if (next) {
-    return {
-      data: await paginate(30, next),
-      recentRecordDate: recentRecordDate
-    }
-  } else {
-    return {
-      data: await paginate(30, 1),
-      recentRecordDate: recentRecordDate
-    }
-  }
-}
-
+// * UTIL IMPORTS
+const { getSautiData } = require('./utils.js')
 
 // fn to get the latest price for a product across all markets //
+//! Doesn't need pagination
 async function latestPriceAcrossAllMarkets(query) {
   const {
     product
   } = query
-  const records = await DBSt.schema.raw(
+  const data = await DBSt.schema.raw(
     `SELECT pmp.source, pmp.market, pmp.product, pmp.retail, pmp.wholesale, pmp.currency, pmp.date, pmp.udate FROM platform_market_prices2 AS pmp INNER JOIN
     (
         SELECT max(date) as maxDate, market, product, retail, currency, wholesale, source, udate
@@ -137,11 +28,22 @@ async function latestPriceAcrossAllMarkets(query) {
      order by pmp.date desc`,
     [product, product]
   )
+
+  // console.log(`LPAAMmodel `, await records[0], `recentRecordDate `, await records[0][0].date)
+
   return {
-    records: records[0],
-    recentRecordDate: records[0][0].date,
+    records: data[0],
+    recentRecordDate: data[0][0].date,
+    pagination: {
+      currentPage:0,
+      total: 0,
+      lastPage: 0
+      }
   }
+  //return console.log(await records[0]) 
+  
 }
+
 // fn to get the latest price for a product by market //
 async function latestPriceByMarket(query) {
   const {
@@ -165,11 +67,32 @@ async function latestPriceByMarket(query) {
     .andWhere('market', `${market}`)
     .orderBy('date', 'desc')
     .limit(1)
-  const result = [queryResult[0]]
-  return {
-    records: result,
-    recentRecordDate: result[0].date
+
+  const result = [await queryResult[0]]
+
+  
+
+  let returnObj =  await {
+    records: result[0],
+    recentRecordDate: result[0].date,
+    pagination: {
+      currentPage:0,
+      total: 0,
+      lastPage: 0
+      }
   }
+
+  // console.log(`model: `,returnObj)
+
+  try{
+    return await returnObj;
+  }
+  catch(error){
+    console.log(error)
+  }
+  
+  // return returnObj
+
 }
 // fn that returns a list of items, markets by default //
 function getListsOfThings(query, selector) {
@@ -243,4 +166,13 @@ async function getProductPriceRange(query) {
     prev: prev,
     count: totalCount
   }
+}
+
+// * 
+module.exports = {
+  getSautiData,
+  latestPriceByMarket,
+  latestPriceAcrossAllMarkets,
+  getProductPriceRange,
+  getListsOfThings
 }

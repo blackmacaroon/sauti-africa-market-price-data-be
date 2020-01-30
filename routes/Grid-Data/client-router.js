@@ -5,22 +5,22 @@ const {
   queryCurrency,
   queryProductMarket,
   playgroundDR
-} = require('../middleware/validate')
+} = require('../../middleware/validate')
 const tokenMiddleware =
   process.env.npm_lifecycle_event !== 'dev'
-    ? require('../middleware/token-middleware')
+    ? require('../../middleware/token-middleware')
     : function(req, res, next) {
         next()
       }
-const db = require('../api-key/dbConfig')
-const Client = require('./client-model.js')
+const db = require('../../api-key/dbConfig')
+const Client = require('../../Models/Grid-Data/client-model.js')
 
-const convertCurrencies = require('../currency')
+const convertCurrencies = require('../../currency')
 
 router.get('/', tokenMiddleware, queryCurrency, (req, res) => {
   const message = req.message
   req.query.count = 30
-  Client.getSautiDataClient(req.query)
+  Client.getSautiData(req.query)
     .then(records => {
       convertCurrencies(records, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
         .then(converted => {
@@ -100,7 +100,7 @@ router.get('/playground/latest', queryProductMarket, (req, res) => {
 //export all
 
 router.get('/export', (req, res) => {
-  Client.getSautiDataClient(req.query, 10000000000)
+  Client.getSautiData(req.query, 10000000000)
     .then(records => {
       convertCurrencies(records, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
         .then(converted => {

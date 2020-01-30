@@ -1,10 +1,9 @@
 const express = require('express')
-const validate = require('../middleware/validate.js')
-// const Developer = require('./developer-model.js')
-const Developer = require('../Models/developer-model.js')
+const validate = require('../../middleware/validate.js')
+const Developer = require('../../Models/Grid-Data/developer-model.js')
 const router = express.Router()
-const convertCurrencies = require('../currency')
-const allowedPeriodFilter = require('../time-filter')
+const convertCurrencies = require('../../currency')
+const allowedPeriodFilter = require('../../time-filter')
 
 
 // Giant filter router
@@ -79,7 +78,6 @@ router.get(
               "The product entered doesn't exist in the database, please check the list of available products"
           })
         } else {
-          console.log(`latestprice else: `,result)
           convertCurrencies(result, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
             .then(converted => {
               allowedPeriodFilter(converted,req.allowableTimePeriod)
@@ -109,28 +107,17 @@ router.get(
   '/product/pricebymarket',
   validate.queryCurrency,
   validate.queryProductMarket,
-  async (req, res) => {
-   return await Developer.latestPriceByMarket(req.query)
-      .then(result => {
-        console.log(`converted1 `,result)
-        if (result) {
-          console.log(`converted2 `,result)
-         return await convertCurrencies(result, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
+  (req, res) => {
+    Developer.latestPriceByMarket(req.query)
+      .then(record => {
+        if (record) {
+          convertCurrencies(record.records, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
           .then(converted => {
-            console.log(`converted3 `,converted)
-           return {
-                data:converted,
-                message:req.message,
-                apiCount:req.count
-              }
-          //  res.status(200).json({
-          //     data:converted,
-          //     message:req.message,
-          //     apiCount:req.count
-          //   })
-          })
-          .then(result => {
-           return console.log(`priceByMarket .then: `,result)
+            res.status(200).json({
+              data:converted,
+              message:req.message,
+              apiCount:req.count
+            })
           })
           .catch(error => {
             console.log(error)
@@ -169,7 +156,6 @@ router.get('/lists', (req, res) => {
 //Req.query needs product,startDate,endDate and returns a range of records
 //startDate is older than endDate
 //requires further validation possibly with moment.js to validate the date values//stretch goal for later
-
 router.get(
   '/product/range',
   validate.queryCurrency,
