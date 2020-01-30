@@ -79,112 +79,58 @@ const convertCurrency = async (source, target, value, exchangeRates) => {
 module.exports = async (response, targetCurrency) => {
   return await getExchangeRates()
     .then(rates => {
-      console.log(`responseStartCurrency: `,response)
-      if (response.data){
-        if (!response.data){
-          return {
-            ratesUpdated: rates.updated,
-            pagination: response.data.pagination,
-            data: response.data.data.map(row => {
-              row.wholesale = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.wholesale,
-                rates
-              )
-              row.retail = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.retail,
-                rates
-              )
-              row.currency = targetCurrency
-              return row
-            }),
-            next: response.data.pagination.currentPage+1,
-            prev: response.data.pagination.currentPage,
-            count: response.data.pagination.total,
-            pageCount: response.data.pagination.lastPage,
-            recentRecordDate:response.recentRecordDate
-          }
-        } else {
-          return {
-            ratesUpdated: rates.updated,
-            pagination: response.data.pagination,
-            data: response.data.data.map(row => {
-              row.wholesale = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.wholesale,
-                rates
-              )
-              row.retail = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.retail,
-                rates
-              )
-              row.currency = targetCurrency
-              return row
-            }),
-            next: Number(response.data.pagination.currentPage)+1,
-            prev: Number(response.data.pagination.currentPage)-1,
-            count: response.data.pagination.total,
-            pageCount: response.data.pagination.lastPage,
-            recentRecordDate:response.recentRecordDate
-          }
+      // console.log(`responseFromCurrency: `, response.recentRecordDate)
+      if (!response.data){
+        return {
+          ratesUpdated: rates.updated,
+          pagination: response.data.pagination,
+          data: response.data.data.map(row => {
+            row.wholesale = convertCurrency(
+              row.currency,
+              targetCurrency,
+              row.wholesale,
+              rates
+            )
+            row.retail = convertCurrency(
+              row.currency,
+              targetCurrency,
+              row.retail,
+              rates
+            )
+            row.currency = targetCurrency
+            return row
+          }),
+          next: response.data.pagination.currentPage+1,
+          prev: response.data.pagination.currentPage,
+          count: response.data.pagination.total,
+          pageCount: response.data.pagination.lastPage,
+          recentRecordDate:response.recentRecordDate
         }
-      }else if (response.records){
-        if (!response.records){
-          return {
-            ratesUpdated: rates.updated,
-            pagination: response.pagination,
-            data: response.records.map(row => {
-              row.wholesale = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.wholesale,
-                rates
-              )
-              row.retail = convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.retail,
-                rates
-              )
-              row.currency = targetCurrency
-              return row
-            }),
-            next: response.pagination.currentPage,
-            prev: response.pagination.currentPage,
-            count: response.pagination.total,
-            recentRecordDate:response.recentRecordDate
-          }
-        } else {
-          return {
-            ratesUpdated: rates.updated,
-            pagination: response.pagination,
-            data: response.records.map(row => {
-              row.wholesale =  convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.wholesale,
-                rates
-              )
-              row.retail =  convertCurrency(
-                row.currency,
-                targetCurrency,
-                row.retail,
-                rates
-              )
-              row.currency = targetCurrency
-              return row
-            }),
-            next: response.pagination.currentPage,
-            prev: response.pagination.currentPage,
-            count: response.pagination.total,
-            recentRecordDate:response.recentRecordDate
-          }
+      } else {
+        return {
+          ratesUpdated: rates.updated,
+          pagination: response.data.pagination,
+          data: response.data.data.map(row => {
+            row.wholesale = convertCurrency(
+              row.currency,
+              targetCurrency,
+              row.wholesale,
+              rates
+            )
+            row.retail = convertCurrency(
+              row.currency,
+              targetCurrency,
+              row.retail,
+              rates
+            )
+            row.currency = targetCurrency
+            return row
+          }),
+          next: Number(response.data.pagination.currentPage)+1,
+          prev: Number(response.data.pagination.currentPage)-1,
+          count: response.data.pagination.total,
+          pageCount: response.data.pagination.lastPage,
+          recentRecordDate:response.recentRecordDate
         }
       }
     })
