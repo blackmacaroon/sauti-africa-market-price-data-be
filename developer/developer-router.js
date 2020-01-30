@@ -14,7 +14,8 @@ router.get(
   (req, res) => {
     Developer.getSautiData(req.query, req.count)
       .then(response => {
-        if (!response.records || response.records.length < 1) {
+        // console.log(`response`,response)
+        if (!response.data || response.data.length < 1) {
           res.status(404).json({
             apiCount: parseInt(req.count),
             message:
@@ -23,8 +24,10 @@ router.get(
         } else {
           convertCurrencies(response, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
           .then(converted => {
+            // console.log(`converted: `, converted)
             allowedPeriodFilter(converted,req.allowableTimePeriod)
             .then(filtered => {
+              // console.log(filtered)
               filtered.count
               ? res.status(200).json({
                   apiCount: parseInt(req.count),
@@ -33,8 +36,7 @@ router.get(
                   records: filtered.records,
                   ratesUpdated: filtered.ratesUpdated,
                   next: filtered.next,
-                  topPageValue: filtered.prev,
-                  pageCount: filtered.count[0]['count(*)']
+                  prev: filtered.prev
                 })
               : res.status(200).json({
                   apiCount: parseInt(req.count),
@@ -43,7 +45,7 @@ router.get(
                   records: filtered.records,
                   ratesUpdated: filtered.ratesUpdated,
                   next: filtered.next,
-                  topPageValue: filtered.prev
+                  prev: filtered.prev
                 })
           })
           })
@@ -174,7 +176,7 @@ router.get(
                 records: filtered.records,
                 ratesUpdated: filtered.ratesUpdated,
                 next: filtered.next,
-                topPageValue: filtered.prev,
+                prev: filtered.prev,
                 pageCount: filtered.count[0]['count(*)']
               })
             : res.status(200).json({
@@ -184,7 +186,7 @@ router.get(
                 records: filtered.records,
                 ratesUpdated: filtered.ratesUpdated,
                 next: filtered.next,
-                topPageValue: filtered.prev
+                prev: filtered.prev
               })
         })
         })

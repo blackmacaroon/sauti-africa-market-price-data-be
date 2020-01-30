@@ -76,13 +76,15 @@ const convertCurrency = (source, target, value, exchangeRates) => {
   } 
 }
 
-module.exports = async (data, targetCurrency) => {
+module.exports = async (response, targetCurrency) => {
   return await getExchangeRates()
     .then(rates => {
-      if (!data.records){
+      // console.log(`responseFromCurrency: `, response.recentRecordDate)
+      if (!response.data){
         return {
           ratesUpdated: rates.updated,
-          data: data.map(row => {
+          pagination: response.data.pagination,
+          data: response.data.data.map(row => {
             row.wholesale = convertCurrency(
               row.currency,
               targetCurrency,
@@ -98,15 +100,17 @@ module.exports = async (data, targetCurrency) => {
             row.currency = targetCurrency
             return row
           }),
-          next: data.next,
-          prev: data.prev,
-          count: data.count,
-          recentRecordDate:data.recentRecordDate
+          next: response.data.pagination.currentPage+1,
+          prev: response.data.pagination.currentPage,
+          count: response.data.pagination.total,
+          pageCount: response.data.pagination.lastPage,
+          recentRecordDate:response.recentRecordDate
         }
       } else {
         return {
           ratesUpdated: rates.updated,
-          data: data.records.map(row => {
+          pagination: response.data.pagination,
+          data: response.data.data.map(row => {
             row.wholesale = convertCurrency(
               row.currency,
               targetCurrency,
@@ -122,10 +126,11 @@ module.exports = async (data, targetCurrency) => {
             row.currency = targetCurrency
             return row
           }),
-          next: data.next,
-          prev: data.prev,
-          count: data.count,
-          recentRecordDate:data.recentRecordDate
+          next: Number(response.data.pagination.currentPage)+1,
+          prev: Number(response.data.pagination.currentPage)-1,
+          count: response.data.pagination.total,
+          pageCount: response.data.pagination.lastPage,
+          recentRecordDate:response.recentRecordDate
         }
       }
     })
@@ -133,7 +138,7 @@ module.exports = async (data, targetCurrency) => {
       console.log(`catch `, error)
       return {
         warning: 'Currency conversion failed. Prices not converted',
-        data
+        response
       }
     })
 }
