@@ -27,7 +27,7 @@ router.get(
             // console.log(`converted: `, converted)
             allowedPeriodFilter(converted,req.allowableTimePeriod)
             .then(filtered => {
-              // console.log(filtered)
+              // console.log(`filtered: `,filtered)
               filtered.count
               ? res.status(200).json({
                   apiCount: parseInt(req.count),
