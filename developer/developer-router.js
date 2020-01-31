@@ -150,6 +150,14 @@ router.get(
   }
 )
 
+router.get('/product/pricebymarket', validate.queryCurrency, validate.queryProductMarket, async (req, res) => {
+
+
+
+
+  
+})
+
 //Pass a string as query for specific list - market,source,country,products
 router.get('/lists', (req, res) => {
   Developer.getListsOfThings(req.query.list)
