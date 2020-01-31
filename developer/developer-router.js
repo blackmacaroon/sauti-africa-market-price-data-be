@@ -6,7 +6,6 @@ const router = express.Router()
 const convertCurrencies = require('../currency')
 const allowedPeriodFilter = require('../time-filter')
 
-
 // Giant filter router
 router.get(
   '/filter',
