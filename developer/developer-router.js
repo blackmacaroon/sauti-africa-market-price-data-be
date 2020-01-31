@@ -72,6 +72,7 @@ router.get(
   (req, res) => {
     Developer.latestPriceAcrossAllMarkets(req.query)
       .then(result => {
+        console.log(`latePriceAllMarkets `, result)
         if (!result.records[0] || result.records[0].length < 1) {
           res.status(404).json({
             apiCount: parseInt(req.count),
@@ -150,8 +151,8 @@ router.get(
 //   }
 // )
 
-router.get('/product/pricebymarket', validate.queryCurrency, validate.queryProductMarket, async (req, res) => {
-
+// validate.queryCurrency, validate.queryProductMarket,
+router.get('/product/pricebymarket',   (req, res) => {
   Developer.latestPriceByMarket(req.query)
   .then(response => {
     console.log(response)

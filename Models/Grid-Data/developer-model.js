@@ -45,6 +45,8 @@ async function latestPriceAcrossAllMarkets(query) {
 }
 
 // fn to get the latest price for a product by market //
+
+//!this code works, needs cleanup. Issue is at the route in the first promise. Object returned by model is not what is being received in the promise.
 async function latestPriceByMarket(query) {
   const {
     product,
@@ -70,8 +72,6 @@ async function latestPriceByMarket(query) {
 
   const result = [await queryResult[0]]
 
-  
-
   let returnObj =  await {
     records: result[0],
     recentRecordDate: result[0].date,
@@ -82,16 +82,14 @@ async function latestPriceByMarket(query) {
       }
   }
 
-  // console.log(`model: `,returnObj)
-
   try{
+    console.log(await returnObj)
     return await returnObj;
   }
   catch(error){
     console.log(error)
   }
   
-  // return returnObj
 
 }
 // fn that returns a list of items, markets by default //
