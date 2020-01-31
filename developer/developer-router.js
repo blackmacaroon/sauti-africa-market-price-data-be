@@ -105,57 +105,57 @@ router.get(
 
 //getting the latest price of a product from a specific market
 //Requires product & market names as string
-router.get(
-  '/product/pricebymarket',
-  validate.queryCurrency,
-  validate.queryProductMarket,
-  async (req, res) => {
-   return await Developer.latestPriceByMarket(req.query)
-      .then(result => {
-        console.log(`converted1 `,result)
-        if (result) {
-          console.log(`converted2 `,result)
-         return await convertCurrencies(result, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
-          .then(converted => {
-            console.log(`converted3 `,converted)
-           return {
-                data:converted,
-                message:req.message,
-                apiCount:req.count
-              }
-          //  res.status(200).json({
-          //     data:converted,
-          //     message:req.message,
-          //     apiCount:req.count
-          //   })
-          })
-          .then(result => {
-           return console.log(`priceByMarket .then: `,result)
-          })
-          .catch(error => {
-            console.log(error)
-          })
-        } else {
-          res.status(404).json({
-            apiCount: parseInt(req.count),
-            message:
-              "That product and market combination doesn't exist, please check spelling and list of products and markets"
-          })
-        }
-      })
-      .catch(error => {
-        console.log(error)
-        res.status(500).send(error.message)
-      })
-  }
-)
+// router.get(
+//   '/product/pricebymarket',
+//   validate.queryCurrency,
+//   validate.queryProductMarket,
+//   async (req, res) => {
+//    return await Developer.latestPriceByMarket(req.query)
+//       .then(result => {
+//         console.log(`converted1 `,result)
+//         if (result) {
+//           console.log(`converted2 `,result)
+//          return await convertCurrencies(result, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
+//           .then(converted => {
+//             console.log(`converted3 `,converted)
+//            return {
+//                 data:converted,
+//                 message:req.message,
+//                 apiCount:req.count
+//               }
+//           //  res.status(200).json({
+//           //     data:converted,
+//           //     message:req.message,
+//           //     apiCount:req.count
+//           //   })
+//           })
+//           .then(result => {
+//            return console.log(`priceByMarket .then: `,result)
+//           })
+//           .catch(error => {
+//             console.log(error)
+//           })
+//         } else {
+//           res.status(404).json({
+//             apiCount: parseInt(req.count),
+//             message:
+//               "That product and market combination doesn't exist, please check spelling and list of products and markets"
+//           })
+//         }
+//       })
+//       .catch(error => {
+//         console.log(error)
+//         res.status(500).send(error.message)
+//       })
+//   }
+// )
 
 router.get('/product/pricebymarket', validate.queryCurrency, validate.queryProductMarket, async (req, res) => {
 
-
-
-
-  
+  Developer.latestPriceByMarket(req.query)
+  .then(response => {
+    console.log(response)
+  })
 })
 
 //Pass a string as query for specific list - market,source,country,products
