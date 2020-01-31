@@ -14,7 +14,7 @@ async function latestPriceAcrossAllMarkets(query) {
   const {
     product
   } = query
-  const data = await DBSt.schema.raw(
+  const records = await DBSt.schema.raw(
     `SELECT pmp.source, pmp.market, pmp.product, pmp.retail, pmp.wholesale, pmp.currency, pmp.date, pmp.udate FROM platform_market_prices2 AS pmp INNER JOIN
     (
         SELECT max(date) as maxDate, market, product, retail, currency, wholesale, source, udate
@@ -29,17 +29,25 @@ async function latestPriceAcrossAllMarkets(query) {
     [product, product]
   )
 
-  // console.log(`LPAAMmodel `, await records[0], `recentRecordDate `, await records[0][0].date)
-
-  return {
-    records: data[0],
-    recentRecordDate: data[0][0].date,
+  // console.log(`LPAAMmodel `, await data[0])
+  
+  let data = {
+    data: records[0],
     pagination: {
       currentPage:0,
       total: 0,
       lastPage: 0
       }
   }
+
+
+
+  return {
+    
+    records: data,
+    recentRecordDate: records[0][0].date,
+
+      }
   //return console.log(await records[0]) 
   
 }
@@ -70,11 +78,10 @@ async function latestPriceByMarket(query) {
     .orderBy('date', 'desc')
     .limit(1)
 
-  const result = [await queryResult[0]]
+  const records = [await queryResult[0]]
 
-  let returnObj =  await {
-    records: result[0],
-    recentRecordDate: result[0].date,
+  let data = {
+    data: records[0],
     pagination: {
       currentPage:0,
       total: 0,
@@ -82,13 +89,33 @@ async function latestPriceByMarket(query) {
       }
   }
 
-  try{
-    console.log(await returnObj)
-    return await returnObj;
-  }
-  catch(error){
-    console.log(error)
-  }
+
+
+  return {
+    
+    records: data,
+    recentRecordDate: records[0].date,
+
+      }
+
+
+  // let returnObj =  await {
+  //   records: result[0],
+  //   recentRecordDate: result[0].date,
+  //   pagination: {
+  //     currentPage:0,
+  //     total: 0,
+  //     lastPage: 0
+  //     }
+  // }
+
+  // try{
+  //   console.log(await returnObj)
+  //   return await returnObj;
+  // }
+  // catch(error){
+  //   console.log(error)
+  // }
   
 
 }

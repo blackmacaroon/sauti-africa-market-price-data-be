@@ -84,25 +84,25 @@ const getSautiData = async (query) => {
             return result[0].date
         })
 
-
+        console.log()
     if (count && next) {
         return {
-            data: await paginate(count, next),
+            records: await paginate(count, next),
             recentRecordDate: recentRecordDate
         }
     } else if (count) {
         return {
-            data: await paginate(count, 1),
+            records: await paginate(count, 1),
             recentRecordDate: recentRecordDate
         }
     } else if (next) {
         return {
-            data: await paginate(30, next),
+            records: await paginate(30, next),
             recentRecordDate: recentRecordDate
         }
     } else {
         return {
-            data: await paginate(30, 1),
+            records: await paginate(30, 1),
             recentRecordDate: recentRecordDate
         }
     }
