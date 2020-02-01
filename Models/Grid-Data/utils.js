@@ -6,6 +6,10 @@
 // Used whereIn in the if/else if statements so that the query can be turned into an array
 // if/else if statements used for countries, markets, etc. for single selection and multiple selection
 const DBSt = require('../../database/dbSTConfig')
+//! needed?
+// const { attachPaginate } = require('knex-paginate')
+
+// attachPaginate();
 
 
 const getSautiData = async (query) => {

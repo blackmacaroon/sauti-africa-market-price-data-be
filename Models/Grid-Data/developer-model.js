@@ -9,7 +9,6 @@ attachPaginate();
 const { getSautiData } = require('./utils.js')
 
 // fn to get the latest price for a product across all markets //
-//! Doesn't need pagination
 async function latestPriceAcrossAllMarkets(query) {
   const {
     product
@@ -54,7 +53,7 @@ async function latestPriceAcrossAllMarkets(query) {
 
 // fn to get the latest price for a product by market //
 
-//!this code works, needs cleanup. Issue is at the route in the first promise. Object returned by model is not what is being received in the promise.
+
 async function latestPriceByMarket(query) {
   const {
     product,
@@ -81,7 +80,7 @@ async function latestPriceByMarket(query) {
   const records = [await queryResult[0]]
 
   let data = {
-    data: records[0],
+    data: [records[0]],
     pagination: {
       currentPage:0,
       total: 0,
@@ -119,6 +118,7 @@ async function latestPriceByMarket(query) {
   
 
 }
+
 // fn that returns a list of items, markets by default //
 function getListsOfThings(query, selector) {
   let queryOperation = DBSt('platform_market_prices2')
@@ -149,9 +149,9 @@ async function getProductPriceRange(query) {
   let entries
   let totalCount
   if (query.next) {
-    const cursorArray = query.next.split('_')
-    const nextDate = new Date(cursorArray[0])
-    const nextId = cursorArray[1]
+    // const cursorArray = query.next.split('_')
+    // const nextDate = new Date(cursorArray[0])
+    // const nextId = cursorArray[1]
     let queryOperation = DBSt('platform_market_prices2')
       .select('*')
       .where('product', product)
@@ -185,6 +185,8 @@ async function getProductPriceRange(query) {
   entriesOffset.length ?
     (prev = `${firstEntry.date}_${firstEntry.id}`) :
     (prev = null)
+  
+  
   return {
     records: entriesOffset,
     next: next,

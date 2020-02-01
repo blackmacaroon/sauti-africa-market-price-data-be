@@ -52,7 +52,6 @@ const getExchangeRates = async () => {
         'http://sautiafrica.org/endpoints/api.php?url=v1/exchangeRates/&type=json'
       )
       .then(res => {
-        
         res.data.updated = new Date().toUTCString() // Store time we pulled from the API
         client.set('recentExchangeRates', JSON.stringify(res.data), 'EX', 600) // cache for 10 minutes
         client.set('lastKnownExchangeRates', JSON.stringify(res.data)) // cache indefinitely as fallback in case API goes down and recentExchangeRates has expired

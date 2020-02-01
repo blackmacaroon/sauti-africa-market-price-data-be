@@ -14,9 +14,6 @@ router.get(
   (req, res) => {
     Developer.getSautiData(req.query, req.count)
       .then(response => {
-        // console.log(`response.data: `, response.records.data,
-        // `response.pagination `, response.records.pagination,      
-        // )
         if (!response.records || response.records.length < 1) {
           res.status(404).json({
             apiCount: parseInt(req.count),
@@ -26,7 +23,6 @@ router.get(
         } else {
           convertCurrencies(response, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
           .then(converted => {
-            // console.log(`converted: `, converted)
             allowedPeriodFilter(converted,req.allowableTimePeriod)
             .then(filtered => {
               // console.log(`filtered: `,filtered)
@@ -119,11 +115,10 @@ router.get(
   (req, res) => {
     Developer.latestPriceByMarket(req.query)
       .then(response => {
-        console.log(`response: `, response)
         if (response) {
           convertCurrencies(response, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
           .then(converted => {
-            console.log(`converted: `, converted)
+            
             res.status(200).json({
               data:converted,
               message:req.message,
