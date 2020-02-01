@@ -78,7 +78,6 @@ const convertCurrency =  (source, target, value, exchangeRates) => {
 module.exports = async (response, targetCurrency) => {
   return await getExchangeRates()
     .then(rates => {
-      console.log(`responseStartCurrency: `,response.records.data[0])
       if (response.records){
         if (!response.records){
            return  {
@@ -130,7 +129,7 @@ module.exports = async (response, targetCurrency) => {
             prev: Number(response.records.pagination.currentPage)-1,
             count: response.records.pagination.total,
             pageCount: response.records.pagination.lastPage,
-            recentRecordDate:response.recentRecordDate
+            recentRecordDate:response.recentRecordDate,
           }
         }
       }
