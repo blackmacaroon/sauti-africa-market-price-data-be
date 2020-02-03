@@ -39,7 +39,6 @@ async function latestPriceAcrossAllMarkets(query) {
   }
 
 
-
   return {
     
     records: data,
@@ -125,12 +124,6 @@ async function getProductPriceRange(query) {
     next
   } = query
 
-  console.log(`product `, product)
-  console.log(`startDate `, startDate)
-  console.log(`endDate `, endDate)
-  console.log(`count `, count)
-  console.log(`next `, next)
-
   let queryOperation = DBSt('platform_market_prices2');
 
   const paginate = async (perPage, currentPage) => await queryOperation
@@ -158,25 +151,21 @@ async function getProductPriceRange(query) {
         })
 
   if (count && next){
-    console.log(`count and next`)
     return{
       records: await paginate(count,next),
       recentRecordDate: recentRecordDate
     } 
   } else if (count){
-    console.log(`count `)
     return{
       records: await paginate(count,1),
       recentRecordDate: recentRecordDate
     }
   } else if (next){
-    console.log(`next `)
       return{
         records: await paginate(30,next),
         recentRecordDate: recentRecordDate
       }
   } else {
-    console.log(`else `)
       return{
         records: await paginate(count,1),
         recentRecordDate: recentRecordDate
