@@ -12,10 +12,6 @@ module.exports = async (req, res, next) => {
   /*=== checks validity of key ===*/
   if (key) {
     try {
-      // Experimental Postgres key validation. Not currently implemented
-      // validKey = await db('apiKeys')
-      //   .where({ key: db.raw("digest(?, 'md5')", [key]) })
-      //   .first()
       for (candidate of keyCandidates) {
         const k = await bcrypt.compare(key, candidate.key)
 

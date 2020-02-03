@@ -34,9 +34,7 @@ router.post('/private', jwtCheck, rules, async (req, res) => {
   //retrieves the expanded user object from auth0 which contains app_metadata.role
 
   axios.post('https://sauti-marketprice-data.herokuapp.com/api/users', idObject)
-  // axios.post('http://localhost:8888/api/users', idObject)
   .then(response => {
-    console.log(response)
    const role = response.data.app_metadata.role;
     return role
   })
@@ -50,7 +48,7 @@ router.post('/private', jwtCheck, rules, async (req, res) => {
             .update({ key: hash, user_role: role})
           res.status(200).json({ existed: true, key: key.apiKey })
         } catch (err) {
-          console.log(`ApiKeyRoute Error: `,err)
+          console.log(err)
         }
       } else {
         try {
