@@ -1,9 +1,9 @@
 const express = require('express')
-const validate = require('../middleware/validate.js')
-const Developer = require('./developer-model.js')
+const validate = require('../../middleware/validate.js')
+const Developer = require('../../Models/Grid-Data/developer-model.js')
 const router = express.Router()
-const convertCurrencies = require('../currency')
-const allowedPeriodFilter = require('../time-filter')
+const convertCurrencies = require('../../currency')
+const allowedPeriodFilter = require('../../time-filter')
 
 
 // Giant filter router
@@ -33,8 +33,9 @@ router.get(
                   records: filtered.records,
                   ratesUpdated: filtered.ratesUpdated,
                   next: filtered.next,
-                  topPageValue: filtered.prev,
-                  pageCount: filtered.count[0]['count(*)']
+                  prev: filtered.prev,
+                  pageCount: filtered.pageCount,
+                  rowCount: filtered.count
                 })
               : res.status(200).json({
                   apiCount: parseInt(req.count),
@@ -43,7 +44,9 @@ router.get(
                   records: filtered.records,
                   ratesUpdated: filtered.ratesUpdated,
                   next: filtered.next,
-                  topPageValue: filtered.prev
+                  prev: filtered.prev,
+                  pageCount: filtered.pageCount,
+                  rowCount: filtered.count
                 })
           })
           })
@@ -68,15 +71,15 @@ router.get(
   validate.queryProduct,
   (req, res) => {
     Developer.latestPriceAcrossAllMarkets(req.query)
-      .then(result => {
-        if (!result.records[0] || result.records[0].length < 1) {
+      .then(response => {
+          if (!response) {
           res.status(404).json({
             apiCount: parseInt(req.count),
             message:
               "The product entered doesn't exist in the database, please check the list of available products"
           })
         } else {
-          convertCurrencies(result, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
+          convertCurrencies(response, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
             .then(converted => {
               allowedPeriodFilter(converted,req.allowableTimePeriod)
               .then(filtered => {
@@ -107,9 +110,9 @@ router.get(
   validate.queryProductMarket,
   (req, res) => {
     Developer.latestPriceByMarket(req.query)
-      .then(record => {
-        if (record) {
-          convertCurrencies(record.records, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
+      .then(response => {
+        if (response) {
+          convertCurrencies(response, req.currency) // Sauti wishes for all currency values to pass through conversion. See further notes in /currency
           .then(converted => {
             res.status(200).json({
               data:converted,
@@ -166,7 +169,7 @@ router.get(
         .then(converted => {
           allowedPeriodFilter(converted,req.allowableTimePeriod)
           .then(filtered => {
-            filtered.count
+            filtered.pageCount
             ? res.status(200).json({
                 apiCount: parseInt(req.count),
                 warning: filtered.warning,
@@ -174,8 +177,9 @@ router.get(
                 records: filtered.records,
                 ratesUpdated: filtered.ratesUpdated,
                 next: filtered.next,
-                topPageValue: filtered.prev,
-                pageCount: filtered.count[0]['count(*)']
+                prev: filtered.prev,
+                pageCount: filtered.pageCount,
+                rowCount: filtered.count
               })
             : res.status(200).json({
                 apiCount: parseInt(req.count),
@@ -184,7 +188,9 @@ router.get(
                 records: filtered.records,
                 ratesUpdated: filtered.ratesUpdated,
                 next: filtered.next,
-                topPageValue: filtered.prev
+                prev: filtered.prev,
+                rowCount: filtered.count,
+                pagCount:filtered.pageCount
               })
         })
         })

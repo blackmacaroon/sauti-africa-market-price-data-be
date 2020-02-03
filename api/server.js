@@ -4,15 +4,17 @@ const cors = require('cors')
 const helmet = require('helmet')
 const compression = require('compression') // Compression in Node.js and Express decreases the downloadable amount of data that’s served to users. Through the use of this compression, we can improve the performance of our Node.js applications as our payload size is reduced drastically.
 const server = express()
-const Client = require('../client/client-model')
-const apikeyRoute = require('../routes/apikeyRoute')
+const Client = require('../Models/Grid-Data/client-model')
 const apiAuthenticator = require('../middleware/apikey-middleware')
 const apiLimiter = require('../middleware/api-limiter-middleware')
-const devRouter = require('../developer/developer-router.js')
-const clientRouter = require('../client/client-router.js')
-const userRoleRouter = require('../routes/users/userRoles')
 const rateLimit = require("express-rate-limit") //throttling package
 const timePeriod = require('../middleware/time-period-middleware')
+
+// * ROUTES
+const apikeyRoute = require('../routes/apikeyRoute')
+const clientRouter = require('../routes/Grid-Data//client-router.js')
+const developerRouter = require('../routes/Grid-Data/developer-router.js')
+const userRoleRouter = require('../routes/users/userRoles')
 
 //Initialize the rate limit 
 const apiThrottler = rateLimit({
@@ -37,7 +39,7 @@ server.use(express.json())
 
 // * ROUTES BELOW
 server.use('/api/apikeyRoute', apikeyRoute)
-server.use('/sauti/developer', apiAuthenticator, apiLimiter, timePeriod, devRouter)
+server.use('/sauti/developer', apiAuthenticator, apiLimiter, timePeriod, developerRouter)
 server.use('/sauti/client', clientRouter)
 server.use('/api/users', userRoleRouter)
 

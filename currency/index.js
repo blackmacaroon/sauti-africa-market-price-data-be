@@ -52,7 +52,6 @@ const getExchangeRates = async () => {
         'http://sautiafrica.org/endpoints/api.php?url=v1/exchangeRates/&type=json'
       )
       .then(res => {
-        
         res.data.updated = new Date().toUTCString() // Store time we pulled from the API
         client.set('recentExchangeRates', JSON.stringify(res.data), 'EX', 600) // cache for 10 minutes
         client.set('lastKnownExchangeRates', JSON.stringify(res.data)) // cache indefinitely as fallback in case API goes down and recentExchangeRates has expired
@@ -68,7 +67,7 @@ const getExchangeRates = async () => {
 }
 
 // Convert current currency value to USD as a base and then to its target currency
-const convertCurrency = (source, target, value, exchangeRates) => {
+const convertCurrency =  (source, target, value, exchangeRates) => {
   if (source !== target && exchangeRates[source].rate !== 0) {
     return (value / exchangeRates[source].rate) * exchangeRates[target].rate
   } else {
@@ -76,64 +75,70 @@ const convertCurrency = (source, target, value, exchangeRates) => {
   } 
 }
 
-module.exports = async (data, targetCurrency) => {
+module.exports = async (response, targetCurrency) => {
   return await getExchangeRates()
     .then(rates => {
-      if (!data.records){
-        return {
-          ratesUpdated: rates.updated,
-          data: data.map(row => {
-            row.wholesale = convertCurrency(
-              row.currency,
-              targetCurrency,
-              row.wholesale,
-              rates
-            )
-            row.retail = convertCurrency(
-              row.currency,
-              targetCurrency,
-              row.retail,
-              rates
-            )
-            row.currency = targetCurrency
-            return row
-          }),
-          next: data.next,
-          prev: data.prev,
-          count: data.count,
-          recentRecordDate:data.recentRecordDate
-        }
-      } else {
-        return {
-          ratesUpdated: rates.updated,
-          data: data.records.map(row => {
-            row.wholesale = convertCurrency(
-              row.currency,
-              targetCurrency,
-              row.wholesale,
-              rates
-            )
-            row.retail = convertCurrency(
-              row.currency,
-              targetCurrency,
-              row.retail,
-              rates
-            )
-            row.currency = targetCurrency
-            return row
-          }),
-          next: data.next,
-          prev: data.prev,
-          count: data.count,
-          recentRecordDate:data.recentRecordDate
+      if (response.records){
+        if (!response.records){
+           return  {
+            ratesUpdated: rates.updated,
+            pagination: response.records.pagination,
+            data: response.records.data.map(row => {
+              row.wholesale =  convertCurrency(
+                row.currency,
+                targetCurrency,
+                row.wholesale,
+                rates
+              )
+              row.retail =  convertCurrency(
+                row.currency,
+                targetCurrency,
+                row.retail,
+                rates
+              )
+              row.currency = targetCurrency
+              return row
+            }),
+            next: response.records.pagination.currentPage+1,
+            prev: response.records.pagination.currentPage,
+            count: response.records.pagination.total,
+            pageCount: response.records.pagination.lastPage,
+            recentRecordDate:response.recentRecordDate
+          }
+        } else {
+          return {
+            ratesUpdated: rates.updated,
+            pagination: response.records.pagination,
+            data: response.records.data.map(row => {
+              row.wholesale =  convertCurrency(
+                row.currency,
+                targetCurrency,
+                row.wholesale,
+                rates
+              )
+              row.retail =  convertCurrency(
+                row.currency,
+                targetCurrency,
+                row.retail,
+                rates
+              )
+              row.currency = targetCurrency
+              return row
+            }),
+            next: Number(response.records.pagination.currentPage)+1,
+            prev: Number(response.records.pagination.currentPage)-1,
+            count: response.records.pagination.total,
+            pageCount: response.records.pagination.lastPage,
+            recentRecordDate:response.recentRecordDate,
+          }
         }
       }
     })
     .catch(error => {
-      console.log(`catch `, error)
+      console.log(`Currency Conversion Error:  `, error)
       return {
         warning: 'Currency conversion failed. Prices not converted',
-        data
+        response
       }
     })
 }
