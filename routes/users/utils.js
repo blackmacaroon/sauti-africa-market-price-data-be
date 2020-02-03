@@ -18,12 +18,17 @@ const options = {
 
 // * RETRIEVE FULL USER SCHEMA / DATA FROM AUTH0
 const fetchUserSchema = async (req, res) => {
+    // console.log(`fetchUserSchema req: `, req)
     let fetchedData;
 
     // * SET TOKEN FOR AUTHORIZED API USAGE
     await request(options)
-        .then(result => !!result === true && JSON.parse(result).access_token)
         .then(result => {
+            console.log(`fetchUserSchema `, result)
+            return !!result === true && JSON.parse(result).access_token
+        })
+        .then(result => {
+            console.log(`userSchema management API `, result)
             const managementAPI = {
                 method: 'GET',
                 url: `https://sauti-africa-market-prices.auth0.com/api/v2/users/${req.body.sub}`,
@@ -35,7 +40,10 @@ const fetchUserSchema = async (req, res) => {
 
             return request(managementAPI)
                 .then(result => { fetchedData = { ...fetchedData, ...JSON.parse(result) }})
-                .then(result => res.status(200).json(fetchedData))
+                .then(result => { 
+                    res.status(200).json(fetchedData)
+                
+                })
         })
 }
 

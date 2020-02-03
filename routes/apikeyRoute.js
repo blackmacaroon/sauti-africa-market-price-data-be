@@ -29,11 +29,14 @@ router.post('/private', jwtCheck, rules, async (req, res) => {
     "sub": `${req.body.sub}`
   }
 
+  console.log(`idObject `, idObject);
 
   //retrieves the expanded user object from auth0 which contains app_metadata.role
 
-  axios.post('https://sauti-africa-market-master.herokuapp.com/api/users', idObject)
+  axios.post('https://sauti-marketprice-data.herokuapp.com/api/users', idObject)
+  // axios.post('http://localhost:8888/api/users', idObject)
   .then(response => {
+    console.log(response)
    const role = response.data.app_metadata.role;
     return role
   })
